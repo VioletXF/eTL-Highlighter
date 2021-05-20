@@ -91,6 +91,8 @@
                                         }
                                         video.innerText += txt + "남음"
                                     }
+                                } else {
+                                    video.innerText += `: ${dday['day']}일 남음`
                                 }
                             } else {
                                 video.innerText += ": 마감"
@@ -165,7 +167,7 @@
                                             if(sec>0)
                                                 status_text.innerText = ` 미제출(${min}분 ${sec}초) `
                                             else
-                                                status_text.innerText = ' 미제출(마감) '
+                                                status_text.innerText = ` 미제출(지각: ${-sec}초) `
                                         }, 500)
                                     } else {
                                         let time_left=''
@@ -178,7 +180,7 @@
                                     status_text.innerText = ` 미제출(${dday['day']}일 ${hour%24}시간) `
                                 }
                             } else {
-                                status_text.innerText = ' 미제출(마감) '
+                                status_text.innerText = ' 미제출(지각) '
                             }
                         } else {
                             status_text.innerText = ' 미제출 '
