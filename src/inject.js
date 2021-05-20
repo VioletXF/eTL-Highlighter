@@ -167,7 +167,7 @@
                                             if(sec>0)
                                                 status_text.innerText = ` 미제출(${min}분 ${sec}초) `
                                             else
-                                                status_text.innerText = ` 미제출(지각: ${-sec}초) `
+                                                status_text.innerText = ` 미제출(지각: ${-sec-1}초) `
                                         }, 500)
                                     } else {
                                         let time_left=''
