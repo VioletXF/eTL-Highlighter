@@ -10,7 +10,7 @@
   "content_scripts": [
     {
       "matches": [
-        "http://etl.snu.ac.kr/course/view.php*"
+        "*://etl.snu.ac.kr/course/view.php*"
       ],
       "js": [
         "jquery.min.js",
