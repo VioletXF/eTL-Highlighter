@@ -253,7 +253,7 @@
         $(function () {
             highlight_video()
             highlight_assignment()
-            highlight_zoom()
+            // highlight_zoom()
         })
     }
 })()
