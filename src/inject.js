@@ -67,16 +67,7 @@
                             let dday = get_dday(date)
                             let hour = dday['hour']
                             if (hour >= 0) {
-                                let txt = ": "
                                 if (hour <= 48) {
-                                    if (hour > 0)
-                                        txt += hour + "시간 "
-                                    if (hour <= 24) {
-                                        let min = dday['min']
-                                        if (min > 0) {
-                                            txt += min + "분 "
-                                        }
-                                    }
                                     if (hour == 0) {
                                         let original = video.innerText
                                         setInterval(function(){
@@ -89,6 +80,15 @@
                                                 video.innerText = original + ": 마감"
                                         },500)
                                     } else {
+                                        let txt = ": "
+                                        if (hour > 0)
+                                            txt += hour + "시간 "
+                                        if (hour <= 24) {
+                                            let min = dday['min']
+                                            if (min > 0) {
+                                                txt += min + "분 "
+                                            }
+                                        }
                                         video.innerText += txt + "남음"
                                     }
                                 }
@@ -149,7 +149,6 @@
 
 
                     } else {
-                        let time_left=''
                         let due = $(vdom).find('div.submissionsummarytable')[0].innerText.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/)
                         if(due){
                             let date = new Date(due[0])
@@ -158,22 +157,28 @@
                                 let hour = dday['hour']
                                 if(hour>=0){
                                     if(hour<24) {
-                                        time_left += `${hour}시간 `
-                                        let min = dday['min']
-                                        time_left += `${min}분`
                                         if (hour == 0) {
                                             setInterval(function () {
                                                 let dday = get_dday(date)
                                                 let min = dday['min']
                                                 let sec = dday['sec']
-                                                status_text.innerText = ` 미제출(${min}분 ${sec}초) `
+                                                if(sec>0)
+                                                    status_text.innerText = ` 미제출(${min}분 ${sec}초) `
+                                                else
+                                                    status_text.innerText = ' 미제출(마감) '
                                             }, 500)
                                         } else {
+                                            let time_left=''
+                                            time_left += `${hour}시간 `
+                                            let min = dday['min']
+                                            time_left += `${min}분`
                                             status_text.innerText = ` 미제출(${time_left}) `
                                         }
                                     } else {
                                         status_text.innerText = ` 미제출(${dday['day']}일 ${hour%24}시간) `
                                     }
+                                } else {
+                                    status_text.innerText = ' 미제출(마감) '
                                 }
                             } else {
                                 status_text.innerText = ' 미제출 '
@@ -190,7 +195,7 @@
         }
     }
     function highlight_zoom(){
-        let zooms = Array.from($("a[href*='http://etl.snu.ac.kr/mod/zoom/view.php']"))
+        let zooms = Array.from($("li.modtype_zoom")).map(e=>($(e).find('div.activityinstance > a')[0]))
         for(let zoom of zooms){
             let url = zoom.href
             let timespan = document.createElement('span')
