@@ -164,7 +164,7 @@
                                             let dday = get_dday(date)
                                             let min = dday['min']
                                             let sec = dday['sec']
-                                            if(sec>0)
+                                            if(sec>=0)
                                                 status_text.innerText = ` 미제출(${min}분 ${sec}초) `
                                             else
                                                 status_text.innerText = ` 미제출(지각: ${-sec-1}초) `
