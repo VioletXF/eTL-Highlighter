@@ -223,12 +223,14 @@
                                 txt += `${min}분 `
                             }
                             if (hour == 0) {
-                                let original = timespan.innerText
 
                                 setInterval(function(){
-                                    let sec = get_dday(date)['sec']
+                                    let dday = get_dday(date)
+                                    let min = dday['min']
+                                    let sec = dday['sec']
+
                                     if(sec>0)
-                                        timespan.innerText = original + txt + sec + "초 후 시작"
+                                        timespan.innerText = `: ${min}분 ${sec}초 후 시작`
                                     else
                                         timespan.innerText = '시작함'
                                 },500)
