@@ -119,77 +119,76 @@
             let status_text = document.createElement("span")
             status_text.innerText = "확인중..."
             assign.appendChild(status_text)
-            $.ajax({
-                url: url, success: function (data) {
-                    let html = data
-                    let vdom = $.parseHTML(html)
+            $.ajax({url: url})
+                .done(function(data){
+                let html = data
+                let vdom = $.parseHTML(html)
 
-                    let is_submitted = $(vdom).find(".submissionstatussubmitted").length != 0
-                    if (is_submitted) {
-                        let is_late = $(vdom).find(".latesubmission").length != 0
-                        if (is_late) {
-                            status_text.innerText = " 지각 제출 "
-                            status_text.style['color'] = 'orange'
-                            span.style['color'] = 'green'
-                            span.style['font-weight'] = 'bold'
-                        } else {
-                            status_text.innerText = " 기간 내 제출 "
-                            status_text.style['color'] = 'green'
-                            span.style['color'] = 'green'
-                            span.style['font-weight'] = 'bold'
-                        }
-                        let feedback = $(vdom).find('#region-main > div > div.feedback > div > table > tbody')[0]
-                        let tr = $(feedback).find('tr')
-                        if(tr.length>1){ //점수 있음
-                            let score = $(tr[0]).find('td.lastcol')[0].innerText
-                            span.innerText=`[${score}] `+span.innerText
-                        } else {
-                            span.innerText='[채점안됨] '+span.innerText
-                        }
-
-
+                let is_submitted = $(vdom).find(".submissionstatussubmitted").length != 0
+                if (is_submitted) {
+                    let is_late = $(vdom).find(".latesubmission").length != 0
+                    if (is_late) {
+                        status_text.innerText = " 지각 제출 "
+                        status_text.style['color'] = 'orange'
+                        span.style['color'] = 'green'
+                        span.style['font-weight'] = 'bold'
                     } else {
-                        let due = $(vdom).find('div.submissionsummarytable')[0].innerText.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/)
-                        if(due){
-                            let date = new Date(due[0])
-                            if(!isNaN(date.getTime())){
-                                let dday = get_dday(date)
-                                let hour = dday['hour']
-                                if(hour>=0){
-                                    if(hour<24) {
-                                        if (hour == 0) {
-                                            setInterval(function () {
-                                                let dday = get_dday(date)
-                                                let min = dday['min']
-                                                let sec = dday['sec']
-                                                if(sec>0)
-                                                    status_text.innerText = ` 미제출(${min}분 ${sec}초) `
-                                                else
-                                                    status_text.innerText = ' 미제출(마감) '
-                                            }, 500)
-                                        } else {
-                                            let time_left=''
-                                            time_left += `${hour}시간 `
+                        status_text.innerText = " 기간 내 제출 "
+                        status_text.style['color'] = 'green'
+                        span.style['color'] = 'green'
+                        span.style['font-weight'] = 'bold'
+                    }
+                    let feedback = $(vdom).find('#region-main > div > div.feedback > div > table > tbody')[0]
+                    let tr = $(feedback).find('tr')
+                    if(tr.length>1){ //점수 있음
+                        let score = $(tr[0]).find('td.lastcol')[0].innerText
+                        span.innerText=`[${score}] `+span.innerText
+                    } else {
+                        span.innerText='[채점안됨] '+span.innerText
+                    }
+
+
+                } else {
+                    let due = $(vdom).find('div.submissionsummarytable')[0].innerText.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/)
+                    if(due){
+                        let date = new Date(due[0])
+                        if(!isNaN(date.getTime())){
+                            let dday = get_dday(date)
+                            let hour = dday['hour']
+                            if(hour>=0){
+                                if(hour<24) {
+                                    if (hour == 0) {
+                                        setInterval(function () {
+                                            let dday = get_dday(date)
                                             let min = dday['min']
-                                            time_left += `${min}분`
-                                            status_text.innerText = ` 미제출(${time_left}) `
-                                        }
+                                            let sec = dday['sec']
+                                            if(sec>0)
+                                                status_text.innerText = ` 미제출(${min}분 ${sec}초) `
+                                            else
+                                                status_text.innerText = ' 미제출(마감) '
+                                        }, 500)
                                     } else {
-                                        status_text.innerText = ` 미제출(${dday['day']}일 ${hour%24}시간) `
+                                        let time_left=''
+                                        time_left += `${hour}시간 `
+                                        let min = dday['min']
+                                        time_left += `${min}분`
+                                        status_text.innerText = ` 미제출(${time_left}) `
                                     }
                                 } else {
-                                    status_text.innerText = ' 미제출(마감) '
+                                    status_text.innerText = ` 미제출(${dday['day']}일 ${hour%24}시간) `
                                 }
                             } else {
-                                status_text.innerText = ' 미제출 '
+                                status_text.innerText = ' 미제출(마감) '
                             }
                         } else {
                             status_text.innerText = ' 미제출 '
                         }
-                        status_text.style['color'] = 'red'
-                        span.style['color'] = 'red'
-                        span.style['font-weight'] = 'bold'
+                    } else {
+                        status_text.innerText = ' 미제출 '
                     }
+                    status_text.style['color'] = 'red'
+                    span.style['color'] = 'red'
+                    span.style['font-weight'] = 'bold'
                 }
             })
         }
@@ -201,53 +200,48 @@
             let timespan = document.createElement('span')
             timespan.innerText = ": 확인중..."
             $(zoom).find('span.instancename')[0].appendChild(timespan)
-            $.ajax(
-                {
-
-                    url:url,
-                    success: function(data){
-                        let html = data
-                        let vdom = $.parseHTML(html)
-                        let datetxt=$(vdom).find('#region-main > div > table > tbody > tr:nth-child(2) > td.cell.c1.lastcol')[0].innerText
-                        console.log(datetxt)
-                        let date = new Date(datetxt)
-                        timespan.innerText=': '+$(vdom).find('#region-main > div > table > tbody > tr.lastrow > td.cell.c1.lastcol')[0].innerText
-                        if(!isNaN(date.getTime())){
-                            let dday = get_dday(date)
-                            let hour = dday['hour']
-                            if(hour>=0){
-                                if(hour<=10) {
-                                    let txt = ': '
-                                    if (hour > 0)
-                                        txt+=`${hour}시간 `
-                                    if (hour <= 2) {
-                                        let min = dday['min']
-                                        txt += `${min}분 `
-                                    }
-                                    if (hour == 0) {
-                                        let original = timespan.innerText
-
-                                        setInterval(function(){
-                                            let sec = get_dday(date)['sec']
-                                            if(sec>0)
-                                                timespan.innerText = original + txt + sec + "초 후 시작"
-                                            else
-                                                timespan.innerText = '시작함'
-                                       },500)
-                                    } else {
-                                        txt += '후 시작'
-                                        timespan.innerText = txt
-                                    }
-                                } else {
-                                    timespan.innerText = ''
-                                }
+            $.ajax({url:url,})
+                .done(function(data){
+                let html = data
+                let vdom = $.parseHTML(html)
+                let datetxt=$(vdom).find('#region-main > div > table > tbody > tr:nth-child(2) > td.cell.c1.lastcol')[0].innerText
+                console.log(datetxt)
+                let date = new Date(datetxt)
+                timespan.innerText=': '+$(vdom).find('#region-main > div > table > tbody > tr.lastrow > td.cell.c1.lastcol')[0].innerText
+                if(!isNaN(date.getTime())){
+                    let dday = get_dday(date)
+                    let hour = dday['hour']
+                    if(hour>=0){
+                        if(hour<=10) {
+                            let txt = ': '
+                            if (hour > 0)
+                                txt+=`${hour}시간 `
+                            if (hour <= 2) {
+                                let min = dday['min']
+                                txt += `${min}분 `
                             }
+                            if (hour == 0) {
+                                let original = timespan.innerText
+
+                                setInterval(function(){
+                                    let sec = get_dday(date)['sec']
+                                    if(sec>0)
+                                        timespan.innerText = original + txt + sec + "초 후 시작"
+                                    else
+                                        timespan.innerText = '시작함'
+                                },500)
+                            } else {
+                                txt += '후 시작'
+                                timespan.innerText = txt
+                            }
+                        } else {
+                            timespan.innerText = ''
                         }
-
-
                     }
                 }
-            )
+
+
+            })
         }
     }
     if (current_url.startsWith(course_view_url_start)) {
