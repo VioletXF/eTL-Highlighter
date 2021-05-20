@@ -178,6 +178,8 @@
                             } else {
                                 status_text.innerText = ' 미제출 '
                             }
+                        } else {
+                            status_text.innerText = ' 미제출 '
                         }
                         status_text.style['color'] = 'red'
                         span.style['color'] = 'red'
