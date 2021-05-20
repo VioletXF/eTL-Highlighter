@@ -28,7 +28,9 @@
             throw Error('id is NaN')
         let html = $.ajax({url: check_view_state_url_start + id, async: false}).responseText
         let vdom = $.parseHTML(html)
-
+        if($(vdom).find('.alert-danger').length!=0){
+            return
+        }
         let video_state_list = Array.from($(vdom).find('.user_progress')[0].children[2].children).map(e => ({
 
             title: normalize_title($(e).find('.text-left')[0] ? $(e).find('.text-left')[0].innerText : ""),
@@ -119,6 +121,15 @@
                             span.style['color'] = 'green'
                             span.style['font-weight'] = 'bold'
                         }
+                        let feedback = $(vdom).find('#region-main > div > div.feedback > div > table > tbody')[0]
+                        let tr = $(feedback).find('tr')
+                        if(tr.length>1){ //점수 있음
+                            let score = $(tr[0]).find('td.lastcol')[0].innerText
+                            span.innerText=`[${score}] `+span.innerText
+                        } else {
+                            span.innerText='[채점안됨] '+span.innerText
+                        }
+
 
                     } else {
                         let time_left = html.split("마감까지 남은 기한</td>")[1].split("</td>")[0].split(">")[1]
