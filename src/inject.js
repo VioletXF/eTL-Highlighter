@@ -17,9 +17,10 @@
         let today = new Date().getTime();
         let retn={}
         let gap = date.getTime() - today
+        retn['day'] = Math.floor(gap/(1000*60*60*24))
         retn['hour'] = Math.floor(gap / (1000 * 60 * 60))
         retn['min'] = Math.floor((gap % (1000 * 60 * 60)) / (1000 * 60))
-        retn['sec'] = Math.floor(gap/1000)
+        retn['sec'] = Math.floor(gap/1000)%60
         return retn
     }
     function highlight_video(){
@@ -40,7 +41,7 @@
         let video_state_map_by_title = {}
         for (let video_state of video_state_list)
             video_state_map_by_title[video_state.title] = video_state
-        let videos = Array.from($("a[href*='http://etl.snu.ac.kr/mod/vod/view.php']")).map(e => ($(e).find('span.instancename')[0]))
+        let videos = Array.from($("li.modtype_vod")).map(e => ($(e).find('span.instancename')[0]))
 
         for (let video of videos) {
             let title = normalize_title(video.innerText.split('\n')[0])
@@ -68,12 +69,28 @@
                             if (hour >= 0) {
                                 let txt = ": "
                                 if (hour <= 48) {
-                                    txt += hour + "시간 "
+                                    if (hour > 0)
+                                        txt += hour + "시간 "
                                     if (hour <= 24) {
                                         let min = dday['min']
-                                        txt += min + "분 "
+                                        if (min > 0) {
+                                            txt += min + "분 "
+                                        }
                                     }
-                                    video.innerText += txt + "남음"
+                                    if (hour == 0) {
+                                        let original = video.innerText
+                                        setInterval(function(){
+                                            let dday = get_dday(date)
+                                            let sec = dday['sec']
+                                            let min = dday['min']
+                                            if(sec>0)
+                                                video.innerText = original + `${min}분 ${sec}초 남음`
+                                            else
+                                                video.innerText = original + ": 마감"
+                                        },500)
+                                    } else {
+                                        video.innerText += txt + "남음"
+                                    }
                                 }
                             } else {
                                 video.innerText += ": 마감"
@@ -95,7 +112,7 @@
         }
     }
     function highlight_assignment(){
-        let assignments = Array.from($("a[href*='http://etl.snu.ac.kr/mod/assign/view.php']"))
+        let assignments = Array.from($("li.modtype_assign")).map(e=>($(e).find('div.activityinstance > a')[0]))
         for (let assign of assignments) {
             let url = assign.href
             let span = $(assign).find('.instancename')[0]
@@ -132,8 +149,36 @@
 
 
                     } else {
-                        let time_left = html.split("마감까지 남은 기한</td>")[1].split("</td>")[0].split(">")[1]
-                        status_text.innerText = ` 미제출(${time_left}) `
+                        let time_left=''
+                        let due = $(vdom).find('div.submissionsummarytable')[0].innerText.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/)
+                        if(due){
+                            let date = new Date(due[0])
+                            if(!isNaN(date.getTime())){
+                                let dday = get_dday(date)
+                                let hour = dday['hour']
+                                if(hour>=0){
+                                    if(hour<24) {
+                                        time_left += `${hour}시간 `
+                                        let min = dday['min']
+                                        time_left += `${min}분`
+                                        if (hour == 0) {
+                                            setInterval(function () {
+                                                let dday = get_dday(date)
+                                                let min = dday['min']
+                                                let sec = dday['sec']
+                                                status_text.innerText = ` 미제출(${min}분 ${sec}초) `
+                                            }, 500)
+                                        } else {
+                                            status_text.innerText = ` 미제출(${time_left}) `
+                                        }
+                                    } else {
+                                        status_text.innerText = ` 미제출(${dday['day']}일 ${hour%24}시간) `
+                                    }
+                                }
+                            } else {
+                                status_text.innerText = ' 미제출 '
+                            }
+                        }
                         status_text.style['color'] = 'red'
                         span.style['color'] = 'red'
                         span.style['font-weight'] = 'bold'
@@ -165,13 +210,27 @@
                             let hour = dday['hour']
                             if(hour>=0){
                                 if(hour<=10) {
-                                    let txt = `: ${hour}시간 `
+                                    let txt = ': '
+                                    if (hour > 0)
+                                        txt+=`${hour}시간 `
                                     if (hour <= 2) {
-                                        txt += `${min}분`
+                                        let min = dday['min']
+                                        txt += `${min}분 `
                                     }
-                                    txt += ' 후 시작'
+                                    if (hour == 0) {
+                                        let original = timespan.innerText
 
-                                    timespan.innerText = txt
+                                        setInterval(function(){
+                                            let sec = get_dday(date)['sec']
+                                            if(sec>0)
+                                                timespan.innerText = original + txt + sec + "초 후 시작"
+                                            else
+                                                timespan.innerText = '시작함'
+                                       },500)
+                                    } else {
+                                        txt += '후 시작'
+                                        timespan.innerText = txt
+                                    }
                                 } else {
                                     timespan.innerText = ''
                                 }
