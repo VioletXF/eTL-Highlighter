@@ -8,7 +8,16 @@
     function normalize_title(title) {
         return title.replace(/ /g, '')
     }
-
+    function format_zero(num, count){
+        num = num+''
+        while(num.length<count){
+            num = '0'+num
+        }
+        return num
+    }
+    function toCalendarString(calendar) {
+        return calendar.toJSON().replaceAll('-','').split(':').splice(0,2).join('')+'00Z'
+    }
     function get_presence(item) {
         let td = item.not('.vmiddle')
         return td.last()[0] ? td.last()[0].innerText : ''
@@ -113,6 +122,9 @@
             }
         }
     }
+
+
+
     function highlight_assignment(){
         let assignments = Array.from($("li.modtype_assign")).map(e=>($(e).find('div.activityinstance > a')[0]))
         for (let assign of assignments) {
@@ -179,6 +191,26 @@
                                 } else {
                                     status_text.innerText = ` 미제출(${dday['day']}일 ${hour%24}시간) `
                                 }
+                                let calendarString = toCalendarString(date)
+                                //https://calendar.google.com/calendar/u/0/r/eventedit?text=Title&details=Description&dates=20210526T074100Z/20210528T074100Z
+                                let lecture_name = $('.coursename')[0].innerText
+                                let link =
+                                    encodeURI(`https://calendar.google.com/calendar/u/0/r/eventedit?text=`+
+                                    `${lecture_name} 과제&details=${span.innerText}`+
+                                    `&dates=${calendarString}/${calendarString}`)
+                                let button = document.createElement('a')
+                                button.href=link
+                                button.target='_blank'
+                                button.style='padding:0px'
+                                let img = document.createElement('img')
+                                img.src=chrome.extension.getURL('calendar.png')
+                                img.width='25'
+                                img.height='25'
+                                button.appendChild(img)
+
+                                assign.parentElement.appendChild(button)
+                                console.log(link)
+                                console.log(date.getTimezoneOffset())
                             } else {
                                 status_text.innerText = ' 미제출(지각) '
                             }
