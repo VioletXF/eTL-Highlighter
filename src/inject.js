@@ -207,10 +207,7 @@
                                 img.width='25'
                                 img.height='25'
                                 button.appendChild(img)
-
                                 assign.parentElement.appendChild(button)
-                                console.log(link)
-                                console.log(date.getTimezoneOffset())
                             } else {
                                 status_text.innerText = ' 미제출(지각) '
                             }
