@@ -2,6 +2,7 @@
     console.log("eTL Highlighter enabled.")
     const current_url = window.location.href
     const domain = current_url.split('/').slice(0, 3).join('/')
+    const course_vod_url_start = `${domain}/mod/vod/viewer.php?id=`
     const course_view_url_start = `${domain}/course/view.php?id=`
     const check_view_state_url_start = `${domain}/report/ubcompletion/user_progress.php?id=`
 
@@ -277,6 +278,27 @@
             })
         }
     }
+
+    function add_download_video(){
+        let help = $("div.vod_help")[0]
+        let div = document.createElement("div")
+        div.className="vod_close"
+        let button = document.createElement("button")
+        button.type = "button"
+        button.className = "vod_close_button"
+        let img = document.createElement("img")
+        img.src = chrome.extension.getURL('download.png');
+        img.width=17
+        img.height=17
+        button.appendChild(img)
+        div.appendChild(button)
+        help.after(div)
+        let m3u8 = document.documentElement.innerHTML.match(/file:.*?(https?:\/\/etlstream\.snu\.ac\.kr.*?\.m3u8)/)[1]
+        downloadM3U8(m3u8)
+    }
+    function downloadM3U8(link){
+
+    }
     if (current_url.startsWith(course_view_url_start)) {
 
         $(function () {
@@ -284,5 +306,7 @@
             highlight_assignment()
             // highlight_zoom()
         })
+    } else if (current_url.startsWith(course_vod_url_start)){
+        add_download_video();
     }
 })()

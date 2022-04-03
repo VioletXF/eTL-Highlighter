@@ -7,11 +7,12 @@
   "icons": {
     "300": "icons/icon-300.png"
   },
-  "web_accessible_resources": ["calendar.png"],
+  "web_accessible_resources": ["calendar.png", "download.png"],
   "content_scripts": [
     {
       "matches": [
-        "*://etl.snu.ac.kr/course/view.php*"
+        "*://etl.snu.ac.kr/course/view.php*",
+        "*://etl.snu.ac.kr/mod/vod/viewer.php?id=*"
       ],
       "js": [
         "jquery.min.js",
