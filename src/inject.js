@@ -1,3 +1,20 @@
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if ((message.from === 'popup') && (message.subject === 'DOMInfo')) {
+        // Collect the necessary data.
+        // (For your specific requirements `document.querySelectorAll(...)`
+        //  should be equivalent to jquery's `$(...)`.)
+        let domInfo = {
+            progress: "1"
+        };
+        console.log(domInfo)
+
+        // Directly respond to the sender (popup),
+        // through the specified callback.
+        sendResponse(domInfo);
+    }
+
+});
 (function () {
     console.log("eTL Highlighter enabled.")
     const current_url = window.location.href
@@ -278,14 +295,21 @@
             })
         }
     }
-
+    var sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
+    function setProgress(progress) {
+        chrome.runtime.sendMessage({type:"setProgress", progress:progress})
+    }
     function add_download_video(){
+
+
+        console.log("why")
         let help = $("div.vod_help")[0]
         let div = document.createElement("div")
         div.className="vod_close"
         let button = document.createElement("button")
         button.type = "button"
         button.className = "vod_close_button"
+        button.style.color = "white"
         let img = document.createElement("img")
         img.src = chrome.extension.getURL('download.png');
         img.width=17
@@ -294,10 +318,87 @@
         div.appendChild(button)
         help.after(div)
         let m3u8 = document.documentElement.innerHTML.match(/file:.*?(https?:\/\/etlstream\.snu\.ac\.kr.*?\.m3u8)/)[1]
-        downloadM3U8(m3u8)
-    }
-    function downloadM3U8(link){
+        console.log(m3u8)
+        $(button).click(async function onclick(){
+       /*     chrome.runtime.sendMessage({type:"download", data:["a","b"]}, (response) => {
 
+            })
+
+            chrome.runtime.sendMessage({
+                type: "showPageAction",
+                data: []
+            }, (response) => {
+            });*/
+            setProgress("플레이리스트 읽어오는 중...")
+
+            let base = m3u8.match(/(.+)\/.*/)[1]+"/";
+            let tsArray = fetchM3U8(base, m3u8.split(base)[1]);
+
+            let blobsDict = {}
+            let downloaded = 0;
+            let totalCount = tsArray.length;
+            let blobs = []
+            img.hidden = true
+            button.innerText.fontcolor("white")
+            button.innerText = "0%";
+
+            async function f() {
+
+                for (let i = 0; i < totalCount; i++) {
+                    console.log("start ", i)
+                    fetch(base+tsArray[i]).then(r => r.blob()).then(blob => {
+                        console.log("complete ", i)
+
+                        blobsDict[i] = blob;
+                        downloaded++;
+                        button.innerText = `${Math.floor(downloaded/totalCount*1000)/10}%`
+                        setProgress(`TS파일 다운로드 중: ${downloaded}/${totalCount}`)
+                    });
+                }
+                while(downloaded < totalCount){
+                    console.log(downloaded)
+                    await sleep(500);
+                }
+                setProgress("TS파일 합치는 중...")
+                for (let i = 0; i < totalCount; i++){
+                    blobs.push(blobsDict[i])
+                }
+
+            }
+            await f();
+            console.log("done")
+
+            let concatBlob = new Blob(blobs);
+            let a = document.createElement("a");
+            let url = URL.createObjectURL(concatBlob)
+            a.href = url;
+            let filename = document.title+".ts";
+            filename = filename.replace(/[/\\?%*:|"<>]/g, '-');
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            setProgress("완료! 다운로드 탭을 확인하세요")
+        })
+    }
+    function fetchM3U8(base, link){
+
+        let request = new XMLHttpRequest()
+        request.open("GET", base + link, false)
+        request.send(null)
+        let data = request.responseText
+        let lines = data.split("\n")
+        let tsArray = []
+        for(let line of lines){
+            line = line.trim()
+            if(line.startsWith("#")) continue;
+            if(line.endsWith(".m3u8")) {
+                tsArray = tsArray.concat(fetchM3U8(base, line))
+            } else if(line.endsWith(".ts")){
+                tsArray.push(line);
+            }
+        }
+        return tsArray;
     }
     if (current_url.startsWith(course_view_url_start)) {
 

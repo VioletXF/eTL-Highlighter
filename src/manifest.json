@@ -8,6 +8,10 @@
     "300": "icons/icon-300.png"
   },
   "web_accessible_resources": ["calendar.png", "download.png"],
+  "background": {
+    "persistant": false,
+    "scripts": ["background.js"]
+  },
   "content_scripts": [
     {
       "matches": [
@@ -19,5 +23,9 @@
         "inject.js"
       ]
     }
-  ]
+  ],
+  "page_action": {
+    "default_title": "Test Extension",
+    "default_popup": "download.html"
+  }
 }
