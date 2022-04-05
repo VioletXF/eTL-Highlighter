@@ -15,7 +15,37 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 
 });
-(function () {
+(async function () {
+    let getOptions = new Promise(function(resolve, reject){
+        chrome.storage.sync.get({"unlocked": false}, function(options){
+            resolve(options.unlocked);
+        })
+    });
+    let unlockCmd = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "KeyB", "KeyA"]
+    let cmdCursor = 0;
+    let unlocked = (await getOptions) === true;
+    document.addEventListener("keydown", (e) => {
+        if(!unlocked) {
+            if (e.code === unlockCmd[cmdCursor]) {
+                cmdCursor++;
+            } else {
+                if (cmdCursor === 2 && unlockCmd[0] === unlockCmd[1] && unlockCmd[1] === e.code) {
+                    cmdCursor = 2;
+                } else {
+                    cmdCursor = 0;
+                }
+            }
+            if (cmdCursor === unlockCmd.length) {
+                unlocked = true
+                chrome.storage.sync.set({unlocked: true})
+                if(current_url.startsWith(course_vod_url_start)){
+                    add_download_video()
+                }
+                console.log("unlocked hidden feature")
+            }
+        }
+    })
+
     console.log("eTL Highlighter enabled.")
     const current_url = window.location.href
     const domain = current_url.split('/').slice(0, 3).join('/')
@@ -300,8 +330,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         chrome.runtime.sendMessage({type:"setProgress", progress:progress})
     }
     function add_download_video(){
-
-
+        if(!unlocked) return
         console.log("why")
         let help = $("div.vod_help")[0]
         let div = document.createElement("div")
@@ -408,6 +437,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             // highlight_zoom()
         })
     } else if (current_url.startsWith(course_vod_url_start)){
-        add_download_video();
+        $(function () {
+            add_download_video()
+        })
     }
 })()

@@ -27,5 +27,8 @@
   "page_action": {
     "default_title": "Test Extension",
     "default_popup": "download.html"
-  }
+  },
+  "permissions": [
+    "storage"
+  ]
 }
