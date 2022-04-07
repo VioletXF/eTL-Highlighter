@@ -239,13 +239,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                                 } else {
                                     status_text.innerText = ` 미제출(${dday['day']}일 ${hour%24}시간) `
                                 }
-                                let calendarString = toCalendarString(date)
+                                let calDateWithOffset = new Date(date)
+                                let calDateReal = new Date(date)
+                                if(date.getHours() <= 1) {
+                                    calDateWithOffset.setDate(calDateWithOffset.getDate()-1)
+                                    calDateWithOffset.setHours(23, 59, 59)
+                                    if(date.getHours() === 0){
+                                        calDateReal = calDateWithOffset
+                                    }
+                                }
+                                let calendarStringWithOffset = toCalendarString(calDateWithOffset)
+                                let calendarStringReal = toCalendarString(calDateReal)
                                 //https://calendar.google.com/calendar/u/0/r/eventedit?text=Title&details=Description&dates=20210526T074100Z/20210528T074100Z
                                 let lecture_name = $('.coursename')[0].innerText
                                 let link =
                                     encodeURI(`https://calendar.google.com/calendar/u/0/r/eventedit?text=`+
                                     `${lecture_name} 과제&details=${span.innerText}`+
-                                    `&dates=${calendarString}/${calendarString}`)
+                                    `&dates=${calendarStringWithOffset}/${calendarStringReal}`)
                                 let button = document.createElement('a')
                                 button.href=link
                                 button.target='_blank'
